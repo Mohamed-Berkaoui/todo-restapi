@@ -1,14 +1,21 @@
-const todoRouter=require('express').Router()
+const todoRouter = require("express").Router();
 const todoControllers = require("../controllers/todo");
-const asyncHandler = require('../utils/asyncHandler');
+const asyncHandler = require("../utils/asyncHandler");
+const verifyToken = require("../utils/verifyToken");
 
-todoRouter.get("/",asyncHandler(todoControllers.getAllTodos) );
-todoRouter.post("/", todoControllers.addTodo);
-todoRouter.get("/:id", todoControllers.getSingleTodo);
-todoRouter.put("/:id", todoControllers.updateTodo);
-todoRouter.delete("/:id", todoControllers.deleteTodo);
-todoRouter.all('*',function(req,res,next){
-    console.log("first")
-    next()
-})
-module.exports=todoRouter
+todoRouter.use(verifyToken("admin","user"))
+
+todoRouter
+  .route("/")
+  .get( verifyToken("admin"),asyncHandler(todoControllers.getAllTodos))
+  .post( asyncHandler(todoControllers.addTodo));
+
+  todoRouter.get('/usertodos',asyncHandler(todoControllers.getUserTodos))
+  
+todoRouter
+  .route("/:id")
+  .get(asyncHandler(todoControllers.getSingleTodo))
+  .put( asyncHandler(todoControllers.updateTodo))
+  .delete( asyncHandler(todoControllers.deleteTodo));
+  
+module.exports = todoRouter;
